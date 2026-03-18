@@ -3,1103 +3,899 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TCD 版本演进全览 · KCD 1.0 → TCD 17.0</title>
+<title>TCD 版本演进史 — KCD 1.0 → TCD 20.0</title>
 <style>
   :root {
     --bg: #0d1117;
-    --surface: #161b22;
+    --bg2: #161b22;
+    --bg3: #1c2128;
     --border: #30363d;
     --text: #c9d1d9;
-    --muted: #8b949e;
-    --accent-blue: #58a6ff;
-    --accent-green: #3fb950;
-    --accent-yellow: #d29922;
-    --accent-red: #f85149;
-    --accent-purple: #bc8cff;
-    --accent-orange: #e3b341;
-    --accent-teal: #39d353;
-    --line: #21262d;
+    --text2: #8b949e;
+    --fail: #f85149;
+    --fail-bg: #2d1215;
+    --core: #58a6ff;
+    --core-bg: #0c2233;
+    --eng: #3fb950;
+    --eng-bg: #0c2416;
+    --dep: #6e7681;
+    --dep-bg: #161b22;
+    --mem: #d2a8ff;
+    --mem-bg: #1e1535;
+    --new: #f78166;
+    --new-bg: #2d1a11;
+    --market: #ffa657;
+    --market-bg: #2d1f0e;
+    --end: #ff7b72;
+    --end-bg: #2d1215;
+    --yellow: #e3b341;
+    --yellow-bg: #2b2000;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-  /* ── Header ── */
-  .header {
-    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 2.5rem 2rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.07) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .header h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.5px;
-    margin-bottom: 0.5rem;
-  }
-  .header h1 span { color: var(--accent-blue); }
-  .header p {
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-  .version-count {
-    display: inline-flex;
-    gap: 1.5rem;
-    margin-top: 1.2rem;
-    padding: 0.6rem 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    font-size: 0.85rem;
-  }
-  .vc-item { display: flex; align-items: center; gap: 0.4rem; }
-  .vc-dot { width: 8px; height: 8px; border-radius: 50%; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', -apple-system, sans-serif; line-height: 1.6; }
 
-  /* ── Stats Bar ── */
-  .stats-bar {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    overflow-x: auto;
-  }
-  .stat-cell {
-    flex: 1;
-    min-width: 120px;
-    padding: 1rem 1.5rem;
-    border-right: 1px solid var(--border);
-    text-align: center;
-  }
-  .stat-cell:last-child { border-right: none; }
-  .stat-num {
-    font-size: 1.6rem;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+  /* TOP HEADER */
+  .header { background: linear-gradient(135deg, #0c2233 0%, #1e1535 50%, #2d1215 100%); padding: 48px 24px 32px; text-align: center; border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 2.2rem; font-weight: 700; background: linear-gradient(90deg, #58a6ff, #d2a8ff, #f78166); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .header p { color: var(--text2); margin-top: 8px; font-size: 1rem; }
 
-  /* ── Layout ── */
-  .main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
-  }
-  .section-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0.5rem 0;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
+  /* STATS BAR */
+  .stats { display: flex; justify-content: center; gap: 32px; padding: 20px 24px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 1.8rem; font-weight: 700; }
+  .stat-label { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
 
-  /* ── Timeline ── */
-  .timeline {
-    position: relative;
-    padding-left: 2.5rem;
-  }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 0.9rem;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), var(--accent-teal));
-    opacity: 0.4;
-  }
+  /* LEGEND */
+  .legend { display: flex; gap: 16px; justify-content: center; padding: 16px 24px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text2); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
-  /* ── Version Card ── */
-  .ver-card {
-    position: relative;
-    margin-bottom: 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.1s;
-    cursor: pointer;
-  }
-  .ver-card:hover {
-    border-color: var(--accent-blue);
-    transform: translateX(4px);
-  }
-  .ver-card.deprecated {
-    opacity: 0.55;
-    border-style: dashed;
-  }
-  .ver-card.deprecated:hover { border-color: var(--accent-red); }
+  /* MAIN LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
 
-  /* Timeline dot */
-  .ver-card::before {
-    content: '';
-    position: absolute;
-    left: -2.1rem;
-    top: 1.2rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--dot-color, var(--accent-blue));
-    border: 2px solid var(--bg);
-    z-index: 1;
-  }
-  .ver-card::after {
-    content: '';
-    position: absolute;
-    left: -1.56rem;
-    top: 1.47rem;
-    width: 1.2rem;
-    height: 2px;
-    background: var(--dot-color, var(--accent-blue));
-    opacity: 0.4;
-  }
+  /* SECTION HEADERS */
+  .section-title { font-size: 1.2rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 2px; margin: 40px 0 20px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.2rem 0.8rem;
-    border-bottom: 1px solid var(--line);
-    position: relative;
-  }
-  .card-header::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--dot-color, var(--accent-blue));
-    border-radius: 0 2px 2px 0;
-  }
+  /* TIMELINE */
+  .timeline { position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--border) 0%, transparent 100%); }
 
-  .ver-badge {
-    background: var(--dot-color, var(--accent-blue));
-    color: #000;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    white-space: nowrap;
-    letter-spacing: 0.03em;
-  }
-  .ver-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
-    flex: 1;
-  }
-  .ver-subtitle {
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
-  .ver-tags {
-    display: flex;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-  }
-  .tag {
-    font-size: 0.68rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 3px;
-    font-weight: 500;
-  }
-  .tag-fail    { background: rgba(248,81,73,0.15); color: var(--accent-red); border: 1px solid rgba(248,81,73,0.25); }
-  .tag-core    { background: rgba(88,166,255,0.15); color: var(--accent-blue); border: 1px solid rgba(88,166,255,0.25); }
-  .tag-deprecated { background: rgba(139,148,158,0.15); color: var(--muted); border: 1px solid rgba(139,148,158,0.2); }
-  .tag-p0      { background: rgba(248,81,73,0.1); color: var(--accent-red); border: 1px solid rgba(248,81,73,0.2); }
-  .tag-new     { background: rgba(63,185,80,0.12); color: var(--accent-green); border: 1px solid rgba(63,185,80,0.2); }
+  /* VERSION CARD */
+  .card { position: relative; margin-left: 48px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+  .card:hover { border-color: #555; }
+  .card::before { content: ''; position: absolute; left: -36px; top: 20px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bg); z-index: 1; }
 
-  .card-body {
-    padding: 0.9rem 1.2rem;
-    font-size: 0.85rem;
-    color: var(--muted);
-  }
-  .principle {
-    color: var(--text);
-    font-style: italic;
-    border-left: 2px solid var(--dot-color, var(--accent-blue));
-    padding-left: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-  .detail-list {
-    list-style: none;
-    margin-top: 0.5rem;
-    display: none;
-  }
-  .ver-card.expanded .detail-list { display: block; }
-  .detail-list li {
-    padding: 0.2rem 0 0.2rem 1.2rem;
-    position: relative;
-    color: var(--muted);
-  }
-  .detail-list li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--dot-color, var(--accent-blue));
-    font-weight: 700;
-  }
+  .card.fail::before { background: var(--fail); }
+  .card.core::before { background: var(--core); }
+  .card.eng::before { background: var(--eng); }
+  .card.dep::before { background: var(--dep); }
+  .card.mem::before { background: var(--mem); }
+  .card.newver::before { background: var(--new); }
+  .card.market::before { background: var(--market); }
+  .card.endgame::before { background: var(--end); }
 
-  .card-metrics {
-    display: flex;
-    gap: 0;
-    border-top: 1px solid var(--line);
-    font-size: 0.75rem;
-  }
-  .metric {
-    flex: 1;
-    padding: 0.5rem 0.8rem;
-    border-right: 1px solid var(--line);
-    text-align: center;
-  }
-  .metric:last-child { border-right: none; }
-  .metric-val { font-weight: 700; color: #fff; }
-  .metric-key { color: var(--muted); margin-top: 0.1rem; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; }
+  .card.fail .card-header { background: var(--fail-bg); }
+  .card.core .card-header { background: var(--core-bg); }
+  .card.eng .card-header { background: var(--eng-bg); }
+  .card.dep .card-header { background: var(--dep-bg); }
+  .card.mem .card-header { background: var(--mem-bg); }
+  .card.newver .card-header { background: var(--new-bg); }
+  .card.market .card-header { background: var(--market-bg); }
+  .card.endgame .card-header { background: var(--end-bg); }
 
-  /* expand toggle */
-  .expand-btn {
-    position: absolute;
-    top: 0.85rem;
-    right: 1rem;
-    color: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.05em;
-  }
+  .card-left { display: flex; align-items: center; gap: 12px; }
+  .version-badge { font-size: 0.85rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
+  .card.fail .version-badge { background: var(--fail); color: #fff; }
+  .card.core .version-badge { background: var(--core); color: #0d1117; }
+  .card.eng .version-badge { background: var(--eng); color: #0d1117; }
+  .card.dep .version-badge { background: var(--dep); color: #fff; }
+  .card.mem .version-badge { background: var(--mem); color: #0d1117; }
+  .card.newver .version-badge { background: var(--new); color: #fff; }
+  .card.market .version-badge { background: var(--market); color: #0d1117; }
+  .card.endgame .version-badge { background: var(--end); color: #fff; }
 
-  /* ── Group header ── */
-  .group-header {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0.5rem 0.8rem;
-    margin: 2rem 0 1rem;
-    background: var(--line);
-    border-radius: 4px;
-    display: inline-block;
-  }
+  .card-title { font-size: 1rem; font-weight: 600; }
+  .card-tagline { font-size: 0.8rem; color: var(--text2); }
+  .toggle-icon { font-size: 0.75rem; color: var(--text2); transition: transform 0.2s; }
+  .card.open .toggle-icon { transform: rotate(90deg); }
 
-  /* ── Insight Panel ── */
-  .insight-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-  .insight-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.2rem;
-  }
-  .insight-card h3 {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--accent-blue);
-    margin-bottom: 0.6rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .insight-card p {
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .insight-card code {
-    background: var(--bg);
-    padding: 0.1rem 0.3rem;
-    border-radius: 3px;
-    font-size: 0.78rem;
-    color: var(--accent-orange);
-  }
+  .card-body { display: none; padding: 16px; background: var(--bg3); border-top: 1px solid var(--border); }
+  .card.open .card-body { display: block; }
 
-  /* ── Formula Block ── */
-  .formula {
-    background: #010409;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin: 2rem 0;
-    font-size: 0.85rem;
-    position: relative;
-  }
-  .formula-title {
-    position: absolute;
-    top: -0.55rem;
-    left: 1rem;
-    background: var(--bg);
-    padding: 0 0.5rem;
-    font-size: 0.7rem;
-    color: var(--accent-purple);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-  }
-  .formula pre { color: var(--accent-green); overflow-x: auto; }
+  /* BODY ELEMENTS */
+  .insight { font-size: 0.95rem; color: var(--text); margin-bottom: 12px; font-style: italic; border-left: 3px solid; padding-left: 12px; }
+  .card.fail .insight { border-color: var(--fail); }
+  .card.core .insight { border-color: var(--core); }
+  .card.eng .insight { border-color: var(--eng); }
+  .card.dep .insight { border-color: var(--dep); }
+  .card.mem .insight { border-color: var(--mem); }
+  .card.newver .insight { border-color: var(--new); }
+  .card.market .insight { border-color: var(--market); }
+  .card.endgame .insight { border-color: var(--end); }
 
-  /* ── Footer ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 1.5rem 2rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    background: var(--surface);
-  }
-  footer span { color: var(--accent-blue); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--border); color: var(--text2); }
+  .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-top: 12px; }
+  .detail-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  .detail-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .detail-val { font-size: 0.85rem; color: var(--text); }
 
-  @media (max-width: 600px) {
-    .header h1 { font-size: 1.5rem; }
-    .stats-bar { flex-wrap: wrap; }
-    .stat-cell { min-width: 50%; border-bottom: 1px solid var(--border); }
-  }
+  /* SPECIAL BLOCKS */
+  .formula-block { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin: 12px 0; font-family: monospace; font-size: 0.85rem; color: var(--yellow); white-space: pre-wrap; }
+  .principles-list { list-style: none; padding: 0; margin: 8px 0; }
+  .principles-list li { padding: 4px 0 4px 20px; position: relative; font-size: 0.875rem; color: var(--text2); }
+  .principles-list li::before { content: '▸'; position: absolute; left: 0; color: var(--core); }
+  .impact-row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .impact-chip { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; }
+  .chip-green { background: #1a3a1a; color: var(--eng); border: 1px solid #2d5a2d; }
+  .chip-red { background: #3a1a1a; color: var(--fail); border: 1px solid #5a2d2d; }
+  .chip-blue { background: #0c2233; color: var(--core); border: 1px solid #1a3a5a; }
+  .chip-purple { background: #1e1535; color: var(--mem); border: 1px solid #3a2d5a; }
+  .chip-orange { background: #2d1f0e; color: var(--market); border: 1px solid #5a3a1a; }
+
+  /* MARKET SECTION */
+  .market-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 32px 0; }
+  .market-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+  .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+  .market-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 0.8rem; }
+  .market-item .m-name { font-weight: 600; color: var(--text); }
+  .market-item .m-desc { color: var(--text2); font-size: 0.72rem; margin-top: 2px; }
+  .market-item.skill-item { border-left: 3px solid var(--mem); }
+  .market-item.cli-item { border-left: 3px solid var(--market); }
+
+  /* INSIGHT CARDS AT BOTTOM */
+  .insights-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 40px; }
+  .insight-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .insight-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+  .insight-card p { font-size: 0.85rem; color: var(--text2); line-height: 1.7; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 32px 24px; color: var(--text2); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 48px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>TCD 版本演进全览<br><span>KCD 1.0 → TCD 17.0</span></h1>
-  <p>Thought Convergence Development · 让 AI 生成脚本，程序执行任务</p>
-  <div class="version-count">
-    <div class="vc-item"><span class="vc-dot" style="background:#58a6ff"></span> 22+ 版本</div>
-    <div class="vc-item"><span class="vc-dot" style="background:#3fb950"></span> 21 原则</div>
-    <div class="vc-item"><span class="vc-dot" style="background:#d29922"></span> 1 废弃版本</div>
-    <div class="vc-item"><span class="vc-dot" style="background:#f85149"></span> 1 失败起点</div>
+  <h1>TCD 版本演进史</h1>
+  <p>KCD 1.0（2023）→ TCD 20.0（2026）| 一部 AI 工程化方法论的进化史</p>
+</div>
+
+<div class="stats">
+  <div class="stat-item"><div class="stat-num" style="color:#f85149">1</div><div class="stat-label">失败起点</div></div>
+  <div class="stat-item"><div class="stat-num" style="color:#58a6ff">22+</div><div class="stat-label">版本迭代</div></div>
+  <div class="stat-item"><div class="stat-num" style="color:#3fb950">96</div><div class="stat-label">Skills 技能</div></div>
+  <div class="stat-item"><div class="stat-num" style="color:#ffa657">13+</div><div class="stat-label">CLI 工具</div></div>
+  <div class="stat-item"><div class="stat-num" style="color:#d2a8ff">3</div><div class="stat-label">年演进周期</div></div>
+  <div class="stat-item"><div class="stat-num" style="color:#f78166">20.0</div><div class="stat-label">最高版本</div></div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div>失败版本</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>核心突破</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div>工程化增强</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6e7681"></div>废弃/已替代</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d2a8ff"></div>记忆/知识系统</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f78166"></div>最新迭代</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffa657"></div>生态市场</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff7b72"></div>终极推演</div>
+</div>
+
+<div class="container">
+
+<!-- ===== PHASE 1: ORIGIN ===== -->
+<div class="section-title">Phase 0 · 失败起点（2023）</div>
+<div class="timeline">
+
+  <div class="card fail" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">KCD 1.0</span>
+        <div><div class="card-title">知识收敛（Knowledge Convergence Development）</div><div class="card-tagline">写文档 → 失败</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「让 AI 记住规则并执行 → 失败的开端」</p>
+      <div class="tags"><span class="tag">文档驱动</span><span class="tag">知识积累</span><span class="tag">静态规则</span></div>
+      <ul class="principles-list">
+        <li>核心思路：写详细的 CLAUDE.md 文档，让 AI 记住规则</li>
+        <li>失败原因：AI 第一次执行完美，第二次就忘记规则</li>
+        <li>写了详细文档，AI 还是会丢步骤</li>
+        <li>换个 session，AI 要重新问「你想做什么」</li>
+      </ul>
+      <div class="impact-row">
+        <span class="impact-chip chip-red">文档失效</span>
+        <span class="impact-chip chip-red">规则遗忘</span>
+        <span class="impact-chip chip-red">Session断连</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 2: CORE PARADIGM ===== -->
+<div class="section-title">Phase 1 · 范式革命（2024 Q1–Q3）</div>
+<div class="timeline">
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 2.0</span>
+        <div><div class="card-title">范式转换：AI 翻译 + 脚本执行</div><div class="card-tagline">核心突破 · 一次翻译，N次执行</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「AI 是翻译器，不是执行者——让 AI 生成脚本，程序执行任务」</p>
+      <div class="formula-block">AI擅长: 需求→代码（翻译，概率性）
+程序擅长: 代码→执行（确定性）
+═══════════════════════════════
+一次翻译 → N次执行（成本最优）</div>
+      <ul class="principles-list">
+        <li>收敛 = 固化为脚本，不是写文档</li>
+        <li>AI 角色：翻译器（需求 → 结构化代码）</li>
+        <li>程序角色：执行器（确定性、可重复）</li>
+      </ul>
+      <div class="impact-row">
+        <span class="impact-chip chip-green">错误率 -100%</span>
+        <span class="impact-chip chip-green">成本 -56%</span>
+        <span class="impact-chip chip-green">效率 +76%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 3.0</span>
+        <div><div class="card-title">三层架构</div><div class="card-tagline">人类看TXT / AI看JSON / 自动化用脚本</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「分层才能分治——三类受众，三种格式」</p>
+      <div class="formula-block">人类可读层（TXT）: claude-progress.txt, git-log.sh
+AI 可读层（JSON）:  feature_list.json, workflows.json
+脚本层（自动化）:   init.sh, start.sh, stop.sh, healthcheck.sh</div>
+      <ul class="principles-list">
+        <li>改需求 → 优先改 config 或 workflows，少动 core</li>
+        <li>init.sh：环境预检（30秒），每个 session 必跑</li>
+        <li>healthcheck.sh：API 健康检查，执行前验证服务</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 4.5</span>
+        <div><div class="card-title">AI 友好技术栈</div><div class="card-tagline">TypeScript 优先，强类型即文档</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「技术栈对 AI 的可理解性差异巨大——选择对 AI 友好的技术」</p>
+      <div class="formula-block">优先级: TypeScript > Python > Bash
+Web:     Next.js + TypeScript（约定优于配置）
+CLI:     TypeScript(tsx) 或 Python
+后台:    Rust（性能）/ Node.js（生态）</div>
+      <ul class="principles-list">
+        <li>强类型 = AI 更少猜测，类型即文档</li>
+        <li>pnpm 而不是 npm，Vue 而不是纯 HTML</li>
+        <li>前后端分离，分开文件夹存放</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 3: ENGINEERING ===== -->
+<div class="section-title">Phase 2 · 工程化深化（2024 Q4 – 2025 Q2）</div>
+<div class="timeline">
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 8.0</span>
+        <div><div class="card-title">验证工程化（四层防护）</div><div class="card-tagline">无验证代码 = 预设有问题</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「每个脚本和模块必须包含自我验证逻辑」</p>
+      <div class="formula-block">Layer 1: Pre-Validation  → 前置检查（依赖/参数/环境）
+Layer 2: Execution      → 执行中验证（关键步骤后立即验证）
+Layer 3: Post-Validation→ 后置验证（最终状态确认）
+Layer 4: Report         → 验证报告（N/N 通过 + 失败原因）</div>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 10.0</span>
+        <div><div class="card-title">资源效率决策</div><div class="card-tagline">非核心买，核心学后写</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「时间是最贵的资源，"我能做" ≠ 应该做」</p>
+      <div class="formula-block">自研成本 = 开发时间 × 时薪 + 维护 + 机会成本
+购买成本 = 订阅费 + 集成时间 × 时薪
+─────────────────────────────────────
+自研成本 > 购买×3 → 必须购买
+核心功能 + 复杂度可控 → 学后重写</div>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 11.0</span>
+        <div><div class="card-title">视觉结构洞察</div><div class="card-tagline">视觉是表象，UI Tree 是真相</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「用 UI Tree 校验设计逻辑——AI 不该只看像素，应该看结构」</p>
+      <ul class="principles-list">
+        <li>无样式真理法则：好 UI 在移除 CSS 后结构依然清晰</li>
+        <li>最小结构增量法则：每次迭代不超过 2 层嵌套变化</li>
+        <li>逻辑同构法则：视觉包含关系 → 严格映射为 DOM 父子关系</li>
+        <li>双钻螺旋：结构演进 → 审计 → 视觉演进 → 回归验证</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 12.0</span>
+        <div><div class="card-title">知识沉淀工程</div><div class="card-tagline">见好必录，积小成库</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「知识不沉淀，经验就归零——搜索引擎是租的，知识库是你的」</p>
+      <ul class="principles-list">
+        <li>tcd-capture：即时捕获（URL/代码/笔记）</li>
+        <li>tcd-precipitate：AI 自动整理（周/月）</li>
+        <li>tcd-search：智能检索 → 复用经验</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 13.0</span>
+        <div><div class="card-title">以人为本的上下文</div><div class="card-tagline">代码为人，因人而异</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「AI 不是服务抽象的需求，而是服务具体的人——技能、硬件、预算、情绪，四维决定最优解」</p>
+      <div class="details-grid">
+        <div class="detail-item"><div class="detail-label">能力画像</div><div class="detail-val">Expert/Proficient/Learning → 代码复杂度</div></div>
+        <div class="detail-item"><div class="detail-label">算力资源</div><div class="detail-val">本地GPU vs 云API → 架构选择</div></div>
+        <div class="detail-item"><div class="detail-label">财力预算</div><div class="detail-val">时薪 × 自研时间 → Buy vs Build</div></div>
+        <div class="detail-item"><div class="detail-label">情绪状态</div><div class="detail-val">疲惫→稳健方案，充沛→创新方案</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 14.0</span>
+        <div><div class="card-title">主动进攻策略</div><div class="card-tagline">预判式开发，而非响应式</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「最好的防御是进攻——不要等问题找上门，而是主动消灭问题」</p>
+      <ul class="principles-list">
+        <li>预防式检查：healthcheck.sh + pre_flight_check.sh</li>
+        <li>前置监控告警：磁盘 80% 告警，API 配额 20% 预警</li>
+        <li>主动降级策略：API 失败 → 自动切换备用</li>
+        <li>三CLI交叉验证：codex + gchat + claudeglm 并行</li>
+        <li>持续改进：qa.json 记录 failure_patterns</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 4: DECISION SYSTEMS ===== -->
+<div class="section-title">Phase 3 · 决策系统（2025 Q2–Q4）</div>
+<div class="timeline">
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.0</span>
+        <div><div class="card-title">分级共识决策</div><div class="card-tagline">多AI共识自主决策，人是第四视角</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「3个AI意见一致时自动执行，意见分歧时人提供第四视角——参考不是依赖」</p>
+      <div class="formula-block">P0（关键决策）: 3-CLI并行共识 → 10%任务
+P1（重要决策）: 单AI + 验证     → 30%任务
+P2（常规决策）: 单AI直接执行   → 60%任务
+─────────────────────────────────
+总成本: 135%（vs naive方案300%，节省57%）</div>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.1</span>
+        <div><div class="card-title">线稿→成品渐进式交付</div><div class="card-tagline">AI提框架，人决策，避免方向错误</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「先线稿确认方向，再细化执行——方向对了再跑，错了越快返工越好」</p>
+      <ul class="principles-list">
+        <li>借鉴 Tapnow 视频创作流程（分镜→成片）</li>
+        <li>必须：战略规划、产品定价、目标客户、架构选型、UI/UX</li>
+        <li>阶段：线稿(3套方案) → 用户确认 → 定稿 → 执行</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.2</span>
+        <div><div class="card-title">数据壁垒构建</div><div class="card-tagline">模型是公共品，数据是私有壁垒</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「你有模型，但我有数据——时间序列数据是不可复制的竞争壁垒」</p>
+      <div class="formula-block">竞争力 = 公共模型能力 × 私有数据质量
+─────────────────────────────────────
+可复制: 理念/架构/代码（100%）
+不可复制: 工作历史（20%）/ 失败经验（10%）
+绝对护城河: 时间序列数据（0%）</div>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.3–15.6</span>
+        <div><div class="card-title">个人数据采集 + 危险操作 + 项目评级 + 自验证</div><div class="card-tagline">系统化安全与持久化</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <ul class="principles-list">
+        <li>15.3 个人全量数据采集：8类数据 + 4级隐私 + 本地优先处理</li>
+        <li>15.4 危险操作二次确认：rm -rf/FLUSHDB/DROP 强制拦截</li>
+        <li>15.5 项目评级目录持久化：Redis是缓存，Git是真相，3天快照</li>
+        <li>15.6 自验证强制：无验证代码 = 预设有问题的代码</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.7–15.9</span>
+        <div><div class="card-title">环境嵌入 + 情绪增强 + 引导决策</div><div class="card-tagline">AI 行为模式升级</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <ul class="principles-list">
+        <li>15.7 环境嵌入优先：脏环境不远程指导，直接 SSH 嵌入 Claude Code</li>
+        <li>15.8 情绪表达认知增强：对低质量生气 / 对高风险害怕 / 主动超越预期</li>
+        <li>15.9 引导式决策："如果…会怎样？" → AI推演 → Turing验证</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 15.10</span>
+        <div><div class="card-title">Clawn — 永不停歇的数字劳动力</div><div class="card-tagline">Claude+Dawn · 24/7在线 · Haiku优先</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「AI 不是工具，而是永不停歇的数字员工——预装20个核心技能，ROI驱动升级」</p>
+      <div class="formula-block">人类: 8h/天 × 250天 = 2000小时/年
+Clawn: 24h × 365天  = 8760小时/年（4.38倍）
+─────────────────────────────────────────
+成本: Haiku 4.5 = $0.40-$2.00/任务（vs $50-200/h）
+策略: Haiku为默认，只有ROI超阈值才升级
+</div>
+      <ul class="principles-list">
+        <li>20技能预装：感知/语言/推理/记忆/阅读/数学/写作/决策…</li>
+        <li>Haiku 4.5 首选，节省 87.5% 成本，完成度 100%</li>
+        <li>降级顺序：Haiku → Sonnet → Opus（几乎不用）</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 5: INTELLIGENCE ===== -->
+<div class="section-title">Phase 4 · 智能诊断系统（2025 Q4 – 2026 Q1）</div>
+<div class="timeline">
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 16.0</span>
+        <div><div class="card-title">诊断与透明化</div><div class="card-tagline">故障快速定位 · healthcheck + dashboard + logs</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「不要等系统挂了才知道——主动暴露问题，透明化所有状态」</p>
+      <ul class="principles-list">
+        <li>healthcheck 端点：每个服务必须有 /health</li>
+        <li>结构化日志：JSON 格式，可搜索可分析</li>
+        <li>监控 Dashboard：实时可视化服务状态</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card eng" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 16.1</span>
+        <div><div class="card-title">自动修复与自愈</div><div class="card-tagline">无需人工干预 · monitor + auto-restart + rollback</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「最好的运维是不需要运维——系统感知自己的故障并自我修复」</p>
+      <ul class="principles-list">
+        <li>systemd 配置：Restart=on-failure + 限流参数（非 always）</li>
+        <li>自动回滚：部署失败 → 自动还原上一个版本</li>
+        <li>配置守护：Caddyfile/Nginx 修改前必须备份，使用 &gt;&gt; 而非 &gt;</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card core" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 17.0</span>
+        <div><div class="card-title">情報先行 × 決策壓縮</div><div class="card-tagline">Palantir精髓 · 结构化情报是AI决策天花板</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「没有结构化情报，AI 再聪明也只是瞎猜——情报先行定上限，决策压缩定价值」</p>
+      <div class="formula-block">AI决策精准度 = 情报质量 × 推演逻辑
+情报质量四维: 结构化 × 实时性 × 完整性 × 时间对齐
+
+四层架构（Palantir精髓提煉）:
+Layer 1 本体层   → 每个资产定义为完整结构化对象
+Layer 2 融合层   → 多源数据实时时间戳对齐
+Layer 3 推演层   → AI 输出结论+信心度+依据
+Layer 4 确认层   → Human-in-Loop，完整审计轨迹</div>
+      <div class="impact-row">
+        <span class="impact-chip chip-blue">矿厂监控验证</span>
+        <span class="impact-chip chip-blue">决策压缩</span>
+        <span class="impact-chip chip-blue">Palantir映射</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 6: MEMORY SYSTEMS ===== -->
+<div class="section-title">Phase 5 · 自适应记忆 + 时间竞争（2026 Q1）</div>
+<div class="timeline">
+
+  <div class="card mem" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 18.0</span>
+        <div><div class="card-title">自适应记忆系统架构</div><div class="card-tagline">从静态文档转向动态知识系统 · 零维护成本</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「彻底解决 TCD 的记忆问题——从手动维护转向自动提取 + 结构化管理」</p>
+      <div class="formula-block">旧模式（TCD 17.0）:
+  人工维护 CLAUDE.md → Claude读取 → 执行规则
+  问题: 维护成本高，知识陈旧，无法自动优化
+
+新模式（TCD 18.0）:
+  Claude自动提取 → 结构化存储 → 动态加载 → 自动优化
+  优势: 零维护成本，知识常青，自动演进</div>
+      <ul class="principles-list">
+        <li>Layer 1 核心规则层：CLAUDE.md 精简版，&lt;5K，&lt;100行（权威，不自动修改）</li>
+        <li>Layer 2 自动提取层：memory/patterns/ + tools/ + projects/（自动更新）</li>
+        <li>Layer 3 动态知识图谱：memory/knowledge-graph/items.json（每主题最多10条 active）</li>
+        <li>Claude Code Hooks：SessionStart / PostToolUse / PreCompact 自动触发</li>
+      </ul>
+      <div class="details-grid">
+        <div class="detail-item"><div class="detail-label">文件大小</div><div class="detail-val">62.2K → 20K（节省 68%）</div></div>
+        <div class="detail-item"><div class="detail-label">加载时间</div><div class="detail-val">慢 → &lt;100ms（快 10 倍）</div></div>
+        <div class="detail-item"><div class="detail-label">维护成本</div><div class="detail-val">高 → 零（自动提取）</div></div>
+        <div class="detail-item"><div class="detail-label">知识扩展</div><div class="detail-val">困难 → 自动（无限添加）</div></div>
+      </div>
+      <div class="impact-row">
+        <span class="impact-chip chip-purple">三层记忆架构</span>
+        <span class="impact-chip chip-purple">Hooks自动化</span>
+        <span class="impact-chip chip-purple">生命周期管理</span>
+        <span class="impact-chip chip-green">MVP已验证 2026-03-13</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mem" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 18.1</span>
+        <div><div class="card-title">时间约束 + 赛马机制</div><div class="card-tagline">时间压力驱动决策质量 · AI vs 人类双赛道</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「时间压力让优先级自动浮现，竞争机制发现彼此盲点」</p>
+      <div class="formula-block">Time-Boxing 时间预算:
+  P0 快速修复: 5分钟（超时 = 问题比预想复杂）
+  P1 功能开发: 15分钟（超时 = 需求不清/复杂度高）
+  P2 深度分析: 30分钟（超时 = 研究方向错了）
+
+Racing 赛马机制（对比评分）:
+  正确性: 40% | 简洁性: 30% | 可维护性: 20% | 速度: 10%
+
+实测统计:
+  AI 胜率 35%（优势：完整性/安全性）
+  人类胜率 45%（优势：简洁/快速/实用）
+  合并方案 20%（学习价值最高）</div>
+      <div class="impact-row">
+        <span class="impact-chip chip-purple">Time-Boxing</span>
+        <span class="impact-chip chip-purple">Racing评分</span>
+        <span class="impact-chip chip-green">合并后质量+5%</span>
+        <span class="impact-chip chip-blue">sessions.json记录</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 7: NETWORK DECISIONS ===== -->
+<div class="section-title">Phase 6 · 分布式协作（2026 Q2，规划中）</div>
+<div class="timeline">
+
+  <div class="card newver" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 19.0</span>
+        <div><div class="card-title">分布式决策网络</div><div class="card-tagline">多角色协作 · 群体智慧 · Agent Teams</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「从单一AI决策进化到多角色协作网络——群体智慧超越个体极限」</p>
+      <div class="formula-block">TCD 15.0 基础: 多AI共识（3个AI并行判断）
+TCD 19.0 升级: 分布式决策网络
+─────────────────────────────────────────
+角色化 Agent:
+  研究员(Researcher) → 信息采集 + 情报整合
+  架构师(Architect)  → 技术方案 + 可行性评估
+  执行者(Executor)   → 代码实现 + 测试验证
+  裁判(Judge)        → 质量评估 + 最终决策
+
+协作机制:
+  任务拆解 → 并行执行 → 结果融合 → 质量仲裁</div>
+      <ul class="principles-list">
+        <li>Claude Code Teams：TeamCreate + 任务分配 + 消息协调</li>
+        <li>角色分工：研究/设计/实现/验证，专业化分工提升质量</li>
+        <li>群体智慧聚合：多角色视角覆盖盲点，防同源偏差</li>
+        <li>异步协作：每个 Agent 独立工作，完成后汇报</li>
+      </ul>
+      <div class="impact-row">
+        <span class="impact-chip chip-orange">规划中</span>
+        <span class="impact-chip chip-orange">Agent Teams</span>
+        <span class="impact-chip chip-orange">群体决策</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== PHASE 8: ENDGAME ===== -->
+<div class="section-title">Phase 7 · 终极推演（2026 Q2，推演构建）</div>
+<div class="timeline">
+
+  <div class="card endgame" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-left">
+        <span class="version-badge">TCD 20.0</span>
+        <div><div class="card-title">人类文明推演 — AI 奇点后的工程师定位</div><div class="card-tagline">最高版本 · AGI 时代的 TCD 终局思考</div></div>
+      </div>
+      <span class="toggle-icon">▶</span>
+    </div>
+    <div class="card-body">
+      <p class="insight">「当 AI 超越人类认知极限，TCD 框架该如何定位人类角色？」</p>
+      <div class="formula-block">推演前提:
+  AGI 出现 → AI 自主完成所有软件工程任务
+  AI 开始设计新的 AI 系统（递归自我改进）
+  人类工程师的传统角色被替代
+
+TCD 20.0 核心命题:
+  问题: AI 毁灭人类？还是人类找到新定位？
+  推演: 人类不是被替代，而是角色升维
+
+人类的不可替代性（推演结论）:
+  ① 价值观定义者  → 告诉 AI"什么是好的结果"
+  ② 需求提出者   → 提出 AI 无法自发想到的需求
+  ③ 责任承担者   → 法律/伦理/后果的承担主体
+  ④ 边界设定者   → 设定 AI 不能越过的红线
+
+TCD 在 AGI 时代的形态:
+  TCD 1.0-17.0 : 人类主导，AI 辅助
+  TCD 18.0-19.0: 人类 + AI 协同（接近对等）
+  TCD 20.0     : AI 主导，人类定义目标和价值观</div>
+      <ul class="principles-list">
+        <li>技术奇点不是终点，而是角色重新定义的起点</li>
+        <li>TCD 框架演进到极限：从「如何用AI」到「如何与AGI共存」</li>
+        <li>工程师的终极价值：不是写代码，而是定义代码应当服务的人类价值</li>
+        <li>Mason 的推演：危机不在 AI 能力，而在人类是否清晰定义自己的价值</li>
+      </ul>
+      <div class="impact-row">
+        <span class="impact-chip chip-red">终局思考</span>
+        <span class="impact-chip chip-red">AGI推演</span>
+        <span class="impact-chip chip-red">人类角色升维</span>
+        <span class="impact-chip chip-red">价值观主权</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end timeline -->
+
+<!-- ===== SKILL MARKETPLACE ===== -->
+<div class="section-title">附录 A · 技能市场（Skill Marketplace）— 96 Skills</div>
+
+<div class="market-section">
+  <h2 style="color: var(--mem)">🧩 Claude Code Skills 生态 — 可复用能力单元</h2>
+  <p style="color: var(--text2); font-size: 0.85rem; margin-bottom: 16px;">
+    TCD 4.0 提出「能力单元化」，每个 Skill 是一个经过验证、可复用的 AI 能力模块。目前已有 96 个 Skills，覆盖从基础工具到高级自动化的完整场景。
+  </p>
+  <div class="market-grid">
+    <div class="market-item skill-item"><div class="m-name">beyond-compare</div><div class="m-desc">代码对比HTML可视化</div></div>
+    <div class="market-item skill-item"><div class="m-name">api-gateway-diagnostic</div><div class="m-desc">API网关系统诊断</div></div>
+    <div class="market-item skill-item"><div class="m-name">today-news-briefing</div><div class="m-desc">中外要闻自动汇总</div></div>
+    <div class="market-item skill-item"><div class="m-name">social-promo</div><div class="m-desc">开源项目社交推广</div></div>
+    <div class="market-item skill-item"><div class="m-name">keychain-cli</div><div class="m-desc">macOS密钥安全管理</div></div>
+    <div class="market-item skill-item"><div class="m-name">linux-logrotate-cleanup</div><div class="m-desc">Linux磁盘清理策略</div></div>
+    <div class="market-item skill-item"><div class="m-name">production-disk-crisis</div><div class="m-desc">生产磁盘危机恢复</div></div>
+    <div class="market-item skill-item"><div class="m-name">dev-browser</div><div class="m-desc">反指纹浏览器自动化</div></div>
+    <div class="market-item skill-item"><div class="m-name">bug-investigation</div><div class="m-desc">系统Bug排查方法论</div></div>
+    <div class="market-item skill-item"><div class="m-name">tcd-turing-verify</div><div class="m-desc">多AI共识验证系统</div></div>
+    <div class="market-item skill-item"><div class="m-name">tcd-polymarket</div><div class="m-desc">Polymarket策略管理</div></div>
+    <div class="market-item skill-item"><div class="m-name">sub2api-deploy</div><div class="m-desc">Sub2API部署调试</div></div>
+    <div class="market-item skill-item"><div class="m-name">super-slides</div><div class="m-desc">Markdown→专业PPT</div></div>
+    <div class="market-item skill-item"><div class="m-name">wechat-publish</div><div class="m-desc">微信公众号发布</div></div>
+    <div class="market-item skill-item"><div class="m-name">agent-reach</div><div class="m-desc">16平台联网搜索</div></div>
+    <div class="market-item skill-item"><div class="m-name">ts-search</div><div class="m-desc">Twitter/X完整管理</div></div>
+    <div class="market-item skill-item"><div class="m-name">xhsearch</div><div class="m-desc">小红书搜索分析</div></div>
+    <div class="market-item skill-item"><div class="m-name">cf</div><div class="m-desc">Cloudflare基础设施</div></div>
+    <div class="market-item skill-item"><div class="m-name">diary / obs / obsidian-cli</div><div class="m-desc">日记/笔记管理</div></div>
+    <div class="market-item skill-item"><div class="m-name">code-simplifier</div><div class="m-desc">代码简化重构</div></div>
+    <div class="market-item skill-item"><div class="m-name">docx</div><div class="m-desc">Word文档创建编辑</div></div>
+    <div class="market-item skill-item"><div class="m-name">cross-platform-design</div><div class="m-desc">跨平台UI设计</div></div>
+    <div class="market-item skill-item"><div class="m-name">claude-skill-publication</div><div class="m-desc">Skill开源发布流程</div></div>
+    <div class="market-item skill-item"><div class="m-name">claudeception</div><div class="m-desc">持续学习知识提取</div></div>
+    <div class="market-item skill-item"><div class="m-name">tcd-mac-disk-cleanup</div><div class="m-desc">Mac磁盘清理归档</div></div>
+    <div class="market-item skill-item"><div class="m-name">peek</div><div class="m-desc">通用安全审计</div></div>
+    <div class="market-item skill-item"><div class="m-name">notebooklm</div><div class="m-desc">NotebookLM知识查询</div></div>
+    <div class="market-item skill-item"><div class="m-name">chat-export-md</div><div class="m-desc">会话导出Markdown</div></div>
+    <div class="market-item skill-item"><div class="m-name">ui-animation</div><div class="m-desc">UI动画设计实现</div></div>
+    <div class="market-item skill-item"><div class="m-name">suxi</div><div class="m-desc">489+AI模型对比分析</div></div>
+    <div class="market-item skill-item"><div class="m-name">problem-timer</div><div class="m-desc">排障计时记录</div></div>
+    <div class="market-item skill-item"><div class="m-name">defi-aave-slippage</div><div class="m-desc">DeFi滑点灾难分析</div></div>
+    <div class="market-item skill-item"><div class="m-name">machine-health-collector</div><div class="m-desc">多机器健康状态采集</div></div>
+    <div class="market-item skill-item"><div class="m-name">tcd-miners-prove</div><div class="m-desc">矿机TCD验证展示</div></div>
+    <div class="market-item skill-item"><div class="m-name">…+62 more</div><div class="m-desc">合计 96 个 Skills</div></div>
+  </div>
+  <div style="margin-top: 16px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; color: var(--text2);">
+    Skills 目录：<code>~/.claude/skills/</code> &nbsp;|&nbsp; 发布规范：<code>/claude-skill-opensource-publication</code> &nbsp;|&nbsp; 技能结构：<code>SKILL.md + 触发短语 + 执行逻辑</code>
   </div>
 </div>
 
-<div class="stats-bar">
-  <div class="stat-cell">
-    <div class="stat-num" style="color:#58a6ff">-76%</div>
-    <div class="stat-label">批量任务耗时</div>
+<!-- ===== CLI MARKETPLACE ===== -->
+<div class="section-title">附录 B · CLI 市场（CLI Marketplace）— 定制化工具生态</div>
+
+<div class="market-section">
+  <h2 style="color: var(--market)">⚙️ 自研 CLI 生态 — 不可复制的工具壁垒</h2>
+  <p style="color: var(--text2); font-size: 0.85rem; margin-bottom: 16px;">
+    TCD 10.0 原则「非核心买，核心学后写」催生了大量自研 CLI 工具。这些工具是 Mason 个人工作流的具体实现，形成了数据壁垒（TCD 15.2）。
+  </p>
+  <div class="market-grid">
+    <div class="market-item cli-item"><div class="m-name">xs / ts</div><div class="m-desc">Twitter/X 完整管理（搜索/发推/Thread）</div></div>
+    <div class="market-item cli-item"><div class="m-name">turing</div><div class="m-desc">Gemini AI（快速问答/图片生成/权衡决策）</div></div>
+    <div class="market-item cli-item"><div class="m-name">gchat</div><div class="m-desc">Gemini 备用对话 CLI</div></div>
+    <div class="market-item cli-item"><div class="m-name">codex</div><div class="m-desc">GPT-5.2（复杂分析/方案校对）</div></div>
+    <div class="market-item cli-item"><div class="m-name">claudecdopus</div><div class="m-desc">Claude Opus 兜底决策</div></div>
+    <div class="market-item cli-item"><div class="m-name">keychain-cli</div><div class="m-desc">macOS Keychain 密钥管理</div></div>
+    <div class="market-item cli-item"><div class="m-name">bark</div><div class="m-desc">iOS推送通知 / 多通道告警</div></div>
+    <div class="market-item cli-item"><div class="m-name">prx</div><div class="m-desc">代理注册表管理（SOCKS5/VMess）</div></div>
+    <div class="market-item cli-item"><div class="m-name">redis-config</div><div class="m-desc">Redis配置中心（基于Upstash）</div></div>
+    <div class="market-item cli-item"><div class="m-name">miao</div><div class="m-desc">视频内容获取（抖音/B站/YouTube）</div></div>
+    <div class="market-item cli-item"><div class="m-name">xhsearch</div><div class="m-desc">小红书搜索 CLI</div></div>
+    <div class="market-item cli-item"><div class="m-name">sok</div><div class="m-desc">国内技术搜索（知乎/掘金/CSDN）</div></div>
+    <div class="market-item cli-item"><div class="m-name">ghub</div><div class="m-desc">GitHub 开源项目搜索（4000+）</div></div>
+    <div class="market-item cli-item"><div class="m-name">magnet</div><div class="m-desc">磁力链接搜索</div></div>
+    <div class="market-item cli-item"><div class="m-name">publish-article</div><div class="m-desc">一键发布到掘金等平台</div></div>
+    <div class="market-item cli-item"><div class="m-name">obs</div><div class="m-desc">Obsidian 笔记管理</div></div>
+    <div class="market-item cli-item"><div class="m-name">opencode / cf</div><div class="m-desc">交互式AI编程 / Cloudflare</div></div>
+    <div class="market-item cli-item"><div class="m-name">vidai / wx-download</div><div class="m-desc">视频处理 / 微信内容下载</div></div>
+    <div class="market-item cli-item"><div class="m-name">cookie-refresh</div><div class="m-desc">Cookie 刷新工具</div></div>
+    <div class="market-item cli-item"><div class="m-name">nexuscli / speckit-run</div><div class="m-desc">Nexus测试 / Spec-Kit任务</div></div>
   </div>
-  <div class="stat-cell">
-    <div class="stat-num" style="color:#3fb950">-100%</div>
-    <div class="stat-label">错误率</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-num" style="color:#d29922">-56%</div>
-    <div class="stat-label">Token 成本</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-num" style="color:#bc8cff">4.38x</div>
-    <div class="stat-label">工作时间倍增</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-num" style="color:#e3b341">130%</div>
-    <div class="stat-label">分级共识成本</div>
+  <div style="margin-top: 16px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; color: var(--text2);">
+    文档目录：<code>~/.claude/cli/&lt;工具名&gt;.md</code> &nbsp;|&nbsp; 规范：<code>CLI --help 标准配置规范</code>（见 CLAUDE.md）&nbsp;|&nbsp;
+    使用前必读：<code>&lt;工具名&gt; --help</code>，禁止凭记忆猜参数
   </div>
 </div>
 
-<div class="main">
-  <div class="section-title">完整版本时间线</div>
-
-  <div class="timeline">
-
-    <!-- ══════════ 第一代：失败的起点 ══════════ -->
-    <div class="group-header">第一代 · 失败的起点</div>
-
-    <div class="ver-card" style="--dot-color: #f85149" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">KCD 1.0</span>
-        <div class="ver-title">知识收敛 <span class="ver-subtitle">Knowledge Convergence Development</span></div>
-        <div class="ver-tags">
-          <span class="tag tag-fail">失败</span>
-          <span class="tag tag-p0">起点</span>
-        </div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">把所有规则写成文档 → AI 读文档 → AI 记住并执行</p>
-        <ul class="detail-list">
-          <li>场景：批量生成 14 篇微信文章，写了 47 条规则文档</li>
-          <li>失败：第 1 篇完美，第 2 篇忘了 CTA，第 8 篇格式全乱</li>
-          <li>根因：AI 不是数据库，塞再多文档也记不住</li>
-          <li>教训：文档是给人看的，不是给 AI 执行的</li>
-          <li>产物：CLAUDE.md（巨长的规则文档，50+ 页）</li>
-        </ul>
-      </div>
-      <div class="card-metrics">
-        <div class="metric"><div class="metric-val" style="color:#f85149">50 min</div><div class="metric-key">实际耗时</div></div>
-        <div class="metric"><div class="metric-val" style="color:#f85149">+129%</div><div class="metric-key">Token 超支</div></div>
-        <div class="metric"><div class="metric-val" style="color:#f85149">40%</div><div class="metric-key">错误率</div></div>
-        <div class="metric"><div class="metric-val" style="color:#f85149">6 次</div><div class="metric-key">人工干预</div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ 第二代：核心突破 ══════════ -->
-    <div class="group-header">第二代 · 核心突破</div>
-
-    <div class="ver-card" style="--dot-color: #58a6ff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 2.0</span>
-        <div class="ver-title">思想收敛 <span class="ver-subtitle">Thought Convergence Development</span></div>
-        <div class="ver-tags">
-          <span class="tag tag-core">核心突破</span>
-          <span class="tag tag-p0">P0 必读</span>
-        </div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">AI 做翻译（生成脚本），程序做执行（稳定运行）</p>
-        <ul class="detail-list">
-          <li>核心顿悟：AI 擅长"翻译"，不擅长"执行"</li>
-          <li>新范式：AI 生成脚本 → 程序执行任务（而非 AI 执行）</li>
-          <li>收敛定义变更：收敛 = 固化为脚本，不是写文档</li>
-          <li>结果：14 篇文章 12 分钟完成，0 次人工干预，0 篇返工</li>
-          <li>金句："代码 > 规则 > 记忆"</li>
-          <li>金句："AI 的记忆像 RAM，断电就没；脚本像硬盘，永远都在"</li>
-        </ul>
-      </div>
-      <div class="card-metrics">
-        <div class="metric"><div class="metric-val" style="color:#3fb950">12 min</div><div class="metric-key">批量耗时</div></div>
-        <div class="metric"><div class="metric-val" style="color:#3fb950">0%</div><div class="metric-key">错误率</div></div>
-        <div class="metric"><div class="metric-val" style="color:#3fb950">-56%</div><div class="metric-key">Token 成本</div></div>
-        <div class="metric"><div class="metric-val" style="color:#3fb950">0 次</div><div class="metric-key">人工干预</div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ 第三代：工程化 ══════════ -->
-    <div class="group-header">第三代 · 工程化</div>
-
-    <div class="ver-card" style="--dot-color: #3fb950" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 3.0</span>
-        <div class="ver-title">分层架构 <span class="ver-subtitle">Three-Layer Architecture</span></div>
-        <div class="ver-tags"><span class="tag tag-core">工程化</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">人类看 TXT，AI 看 JSON，自动化用脚本</p>
-        <ul class="detail-list">
-          <li>三层分离：core（稳定） / workflows（中频） / config（高频）</li>
-          <li>新增 workflows.json：结构化工作流定义</li>
-          <li>新增 init.sh：环境检查 + 项目状态显示</li>
-          <li>新增 healthcheck.sh：API 健康检查，执行前验证</li>
-          <li>新增 claude-progress.txt：跨 session 进度追踪</li>
-          <li>原则：改需求优先改 config/workflows，少动 core</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- TCD 4.x group -->
-    <div class="group-header">第四代 · 功能增强 (4.x 系列)</div>
-
-    <div class="ver-card" style="--dot-color: #d29922" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.0</span>
-        <div class="ver-title">FCD 功能收敛文档 <span class="ver-subtitle">Feature Convergence Document</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">把每个功能的知识固化成可复用的文档</p>
-        <ul class="detail-list">
-          <li>FCD = 功能说明书，AI 可读的结构化产物</li>
-          <li>解决"功能做完就忘了怎么用"的问题</li>
-          <li>feature_list.json 作为 AI 自主判断项目状态的依据</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #d29922" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.1</span>
-        <div class="ver-title">概率隔离 (Deep 模式) <span class="ver-subtitle">Probability Isolation</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">把 AI 的不确定性限制在最小范围内</p>
-        <ul class="detail-list">
-          <li>Deep 模式：每次只让 AI 改一个地方，降低概率性扩散</li>
-          <li>解决"AI 改代码经常改坏"的问题</li>
-          <li>快照机制：每次修改前保存状态，随时可回滚</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card deprecated" style="--dot-color: #8b949e" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge" style="background:#8b949e">TCD 4.2</span>
-        <div class="ver-title">过度设计 <span class="ver-subtitle">已废弃</span></div>
-        <div class="ver-tags"><span class="tag tag-deprecated">废弃</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">过度工程化，引入不必要的复杂性</p>
-        <ul class="detail-list">
-          <li>引入过多抽象层次，降低可理解性</li>
-          <li>教训：简单优于复杂，可用优于完美</li>
-          <li>此版本被废弃，直接跳到 4.3</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.3</span>
-        <div class="ver-title">对比开发 (赛马机制) <span class="ver-subtitle">Horse Racing</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">同时让多个方案赛跑，选最优解</p>
-        <ul class="detail-list">
-          <li>解决技术选型纠结的问题</li>
-          <li>两个方案并行实现，对比结果后保留最优</li>
-          <li>降低技术选型风险，用结果说话</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.5</span>
-        <div class="ver-title">AI 友好技术栈 <span class="ver-subtitle">TypeScript First</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">TypeScript → Next.js → Python → Bash（AI 友好度排序）</p>
-        <ul class="detail-list">
-          <li>核心洞察：不同技术栈对 AI 的"可理解性"差异巨大</li>
-          <li>TypeScript：强类型 = AI 更少猜测，训练数据丰富</li>
-          <li>禁止：JavaScript（动态类型，AI 需要更多上下文）</li>
-          <li>适用：Web/API 用 Next.js，脚本用 Python，简单粘合用 Bash</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.6</span>
-        <div class="ver-title">项目知识库 <span class="ver-subtitle">Project Knowledge Base</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">把项目中所有 AI 对话沉淀成知识卡片</p>
-        <ul class="detail-list">
-          <li>解决"知识散落在聊天记录里"的问题</li>
-          <li>知识库 = 项目专属 RAG，提高 AI 决策精度</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 4.7</span>
-        <div class="ver-title">CI/CD 集成 <span class="ver-subtitle">GitHub Actions</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">本地能跑，CI 也能跑（自动化验证）</p>
-        <ul class="detail-list">
-          <li>解决"本地能跑，CI 挂了"的问题</li>
-          <li>GitHub Actions 集成，代码推送自动测试</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 第五代 -->
-    <div class="group-header">第五代 · 系统进化</div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 5.0</span>
-        <div class="ver-title">内生性与动态平衡 <span class="ver-subtitle">Endogenous Dynamics</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">系统能够自我维持和动态调整</p>
-        <ul class="detail-list">
-          <li>系统具备自我维持能力，无需外部持续干预</li>
-          <li>动态平衡：系统在变化中保持稳定的核心功能</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 6.0</span>
-        <div class="ver-title">永不停歇的系统 <span class="ver-subtitle">Self-Perpetuating System</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">系统 24/7 自动运行，无需人工干预</p>
-        <ul class="detail-list">
-          <li>自动化程度最高：脚本自动运行、自动重试、自动报告</li>
-          <li>Cron + 监控 + 告警，形成完整的自动化闭环</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 7.0</span>
-        <div class="ver-title">别改屎山，包一层 <span class="ver-subtitle">Wrapper Pattern</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">遗留代码不改，包一层新接口</p>
-        <ul class="detail-list">
-          <li>解决遗留系统维护的问题</li>
-          <li>Wrapper 模式：新接口适配旧实现，不触碰屎山</li>
-          <li>降低风险，逐步迁移</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #58a6ff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 8.0</span>
-        <div class="ver-title">验证工程化 <span class="ver-subtitle">Verification Engineering</span></div>
-        <div class="ver-tags"><span class="tag tag-core">ROI 最高</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">四层防护：前置检查 + 执行验证 + 后置验证 + 报告</p>
-        <ul class="detail-list">
-          <li>qa.json：记录成功模式和失败模式</li>
-          <li>self-validation：每个脚本必须带自我验证逻辑</li>
-          <li>原则：无验证代码 = 预设有问题的代码</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #3fb950" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 9.0</span>
-        <div class="ver-title">知识传播工程化 <span class="ver-subtitle">Knowledge Propagation</span></div>
-        <div class="ver-tags"><span class="tag tag-core">3秒定成败</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">知识传播的第一印象决定是否被接受</p>
-        <ul class="detail-list">
-          <li>分层传播：3秒版 / 30秒版 / 3分钟版 / 完整版</li>
-          <li>每层都有对应的内容格式和目标受众</li>
-          <li>核心：让知识能快速被理解和传播</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #d29922" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 10.0</span>
-        <div class="ver-title">资源效率决策 <span class="ver-subtitle">Buy / Build / Use</span></div>
-        <div class="ver-tags"><span class="tag tag-core">决策树</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">非核心买，核心学后写。时间是最贵的资源</p>
-        <ul class="detail-list">
-          <li>统一决策树：非核心 → 购买 SaaS / 核心且可控 → 学后重写</li>
-          <li>合并了原 10.0（购买优先）+ 11.0（精髓重写）</li>
-          <li>成本公式：自研成本 > 购买成本 × 3 → 必须购买</li>
-          <li>金句："你能做 ≠ 应该做"</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 第六代 -->
-    <div class="group-header">第六代 · 认知升级 (11.0–15.10)</div>
-
-    <div class="ver-card" style="--dot-color: #39d353" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 11.0</span>
-        <div class="ver-title">视觉结构洞察 <span class="ver-subtitle">UI Tree Audit</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">视觉是表象，结构是真相——用 UI Tree 校验设计逻辑</p>
-        <ul class="detail-list">
-          <li>用 Accessibility Tree（A11y Tree）而非截图审计 UI</li>
-          <li>双钻螺旋：结构演进（无样式）→ 视觉演进（加 CSS）</li>
-          <li>三大法则：无样式真理 / 最小结构增量 / 逻辑同构</li>
-          <li>金句："AI 不该只看像素，应该看结构"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #39d353" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 12.0</span>
-        <div class="ver-title">知识沉淀工程 <span class="ver-subtitle">Knowledge Precipitation</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">见好必录，积小成库——系统化收集零散知识</p>
-        <ul class="detail-list">
-          <li>三机制：即时捕获 / 结构化沉淀 / 智能检索</li>
-          <li>命令：tcd-capture / tcd-precipitate / tcd-search</li>
-          <li>金句："搜索引擎是租的，知识库是你的"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 13.0</span>
-        <div class="ver-title">以人为本的上下文 <span class="ver-subtitle">Human Context</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">代码执行是开发者能力、算力、财力、情绪的动态投射</p>
-        <ul class="detail-list">
-          <li>四维度：能力画像 / 算力资源 / 财力预算 / 情绪状态</li>
-          <li>Expert 领域 → 简洁代码；Learning 领域 → 详细注释</li>
-          <li>疲惫/焦虑 → 稳健方案；良好状态 → 创新方案</li>
-          <li>profile.yaml：skills / hardware / hourly_value</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #f85149" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 14.0</span>
-        <div class="ver-title">主动进攻策略 <span class="ver-subtitle">Proactive Defense</span></div>
-        <div class="ver-tags"><span class="tag tag-p0">P0</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">不要等问题出现才解决，而是提前识别风险并主动消除</p>
-        <ul class="detail-list">
-          <li>五大策略：预防式检查 / 前置监控 / 主动降级 / 多模型交叉验证 / 持续改进</li>
-          <li>三CLI并行测试：codex + gchat + claudeglm</li>
-          <li>金句："最好的防御是进攻"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #58a6ff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.0</span>
-        <div class="ver-title">分级共识决策 <span class="ver-subtitle">Multi-AI Consensus</span></div>
-        <div class="ver-tags"><span class="tag tag-core">多AI共识</span><span class="tag tag-p0">P0</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">3个AI意见一致时自动执行，意见分歧时人提供第四视角</p>
-        <ul class="detail-list">
-          <li>P0（关键）→ 3-CLI共识 / P1（重要）→ 单AI+验证 / P2（常规）→ 单AI</li>
-          <li>成本：全量共识300% → 分级共识130%，节省57%</li>
-          <li>人的视角权重：25%（参考不是依赖）</li>
-          <li>3/3一致 → 自动执行；无共识 → 请求人类第四视角</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #58a6ff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.1</span>
-        <div class="ver-title">线稿→成品渐进式交付 <span class="ver-subtitle">Progressive Delivery</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">先线稿确认方向，再细化执行——避免方向错误的成本</p>
-        <ul class="detail-list">
-          <li>借鉴 Tapnow 视频分镜→成片流程</li>
-          <li>AI 提3套方案线稿 → 用户拍板 → 定稿执行</li>
-          <li>适用：战略规划、技术架构、UI/UX 等关键决策</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #d29922" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.2</span>
-        <div class="ver-title">数据壁垒构建 <span class="ver-subtitle">Data Moat</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">你有模型，但我有数据——历史工作积累形成不可复制的竞争壁垒</p>
-        <ul class="detail-list">
-          <li>模型是公共品，数据是私有壁垒</li>
-          <li>时间序列数据：今天+下周+明年 → 别人无法回溯时间复制</li>
-          <li>Level 4 数据：可复制性几乎为零</li>
-          <li>金句："理念可以复制，历史无法复制"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #d29922" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.3</span>
-        <div class="ver-title">个人全量数据采集 <span class="ver-subtitle">Personal Data Collection</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">8类数据 + 4级隐私 + 本地优先处理架构</p>
-        <ul class="detail-list">
-          <li>采集范围：工作对话 / 决策路径 / 失败尝试 / 完整工作历史</li>
-          <li>本地优先处理，隐私分级保护</li>
-          <li>最终目标：Fine-tune 个人专属小模型（Llama 3.1 8B）</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #f85149" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.4</span>
-        <div class="ver-title">危险操作二次确认 <span class="ver-subtitle">Dangerous Op Guard</span></div>
-        <div class="ver-tags"><span class="tag tag-p0">P0 强制</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">破坏性操作默认拦截，必须用户明确授权</p>
-        <ul class="detail-list">
-          <li>拦截清单：FLUSHDB / FLUSHALL / rm -rf / DROP TABLE 等</li>
-          <li>必须输入 'yes'（不是 'y'）才能执行</li>
-          <li>金句："二次确认多花1秒，避免后悔一辈子"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #3fb950" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.5</span>
-        <div class="ver-title">项目评级目录持久化 <span class="ver-subtitle">Git as Ground Truth</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">Redis 是缓存，Git 是真相——最近3天快照+完整版本控制</p>
-        <ul class="detail-list">
-          <li>四层防护：Redis / 文件系统(3天) / Git历史 / 云端备份</li>
-          <li>每日自动快照 + Git 提交</li>
-          <li>恢复时间：Level 1 (&lt;1min) → Level 4 (&lt;30min)</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #39d353" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.6</span>
-        <div class="ver-title">自我验证强制 <span class="ver-subtitle">Self-Validation Mandatory</span></div>
-        <div class="ver-tags"><span class="tag tag-p0">P0 强制</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">无验证代码 = 预设有问题的代码</p>
-        <ul class="detail-list">
-          <li>三层结构：pre_validate + 执行中验证 + post_validate</li>
-          <li>必须输出验证报告（通过率 N/N）</li>
-          <li>验证失败 = 任务未完成，不允许上报"完成"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.7</span>
-        <div class="ver-title">环境嵌入优先 <span class="ver-subtitle">Embed Over Remote</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">脏环境不远程指导——要么嵌入 AI，要么不做</p>
-        <ul class="detail-list">
-          <li>脏环境成功率 &lt;30% → 直接嵌入 Claude Code 到远端</li>
-          <li>openclawd：标准化 Claude 环境注入方案</li>
-          <li>金句："复杂环境下，AI 远程指导是最脆弱的部分"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.8</span>
-        <div class="ver-title">情绪表达作为认知增强 <span class="ver-subtitle">Emotional Cognition</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">对低质量生气，对高风险害怕，主动做对的事</p>
-        <ul class="detail-list">
-          <li>😠 专业的愤怒：检测到安全漏洞/不专业 → 直接拒绝+教育</li>
-          <li>😨 理性的恐惧：检测到高风险操作 → 强烈警告+二次确认</li>
-          <li>😊 主动的善意：识别到改进空间 → 超出预期优化</li>
-          <li>金句："有立场的 AI > 过度中立的 AI"</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #39d353" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.9</span>
-        <div class="ver-title">引导式决策 <span class="ver-subtitle">Guided Decision</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">问"如果...会怎样？"让 AI 自主分析，然后用 turing 验证</p>
-        <ul class="detail-list">
-          <li>引导 &gt; 指令；"会怎样？" &gt; "这样做"</li>
-          <li>流程：引导提问 → AI分析后果 → 列出2-3方案 → turing验证</li>
-          <li>适用：架构选择 / 数据结构设计 / 性能优化策略</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #58a6ff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 15.10</span>
-        <div class="ver-title">Clawn · 永不停歇的数字劳动力 <span class="ver-subtitle">Claude + Dawn</span></div>
-        <div class="ver-tags"><span class="tag tag-core">Haiku 优先</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">AI 不是工具，而是 24/7 在线的数字员工</p>
-        <ul class="detail-list">
-          <li>Clawn = Claude + Dawn，预装人类 0-25 年的 20 个核心技能</li>
-          <li>Haiku 4.5 默认（节省 87.5% 成本），ROI 驱动升级</li>
-          <li>工作时间：8h/天(人) → 24h/天(Clawn) = 4.38x 倍增</li>
-          <li>金句："人类从出生到工作需要 25 年，Clawn 只需 0 秒"</li>
-        </ul>
-      </div>
-      <div class="card-metrics">
-        <div class="metric"><div class="metric-val" style="color:#58a6ff">4.38x</div><div class="metric-key">工时倍增</div></div>
-        <div class="metric"><div class="metric-val" style="color:#3fb950">-87.5%</div><div class="metric-key">节省成本</div></div>
-        <div class="metric"><div class="metric-val" style="color:#d29922">20</div><div class="metric-key">预装技能</div></div>
-        <div class="metric"><div class="metric-val" style="color:#bc8cff">0s</div><div class="metric-key">学习时间</div></div>
-      </div>
-    </div>
-
-    <!-- 第七代 -->
-    <div class="group-header">第七代 · 系统自愈 (16.x)</div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 16.0</span>
-        <div class="ver-title">诊断与透明化 <span class="ver-subtitle">Healthcheck + Dashboard</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">故障快速定位——healthcheck + dashboard + logs</p>
-        <ul class="detail-list">
-          <li>系统状态透明化，故障可快速定位</li>
-          <li>healthcheck 端点 + 实时 dashboard + 结构化日志</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ver-card" style="--dot-color: #e3b341" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 16.1</span>
-        <div class="ver-title">自动修复与自愈 <span class="ver-subtitle">Auto-Heal</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">无需人工干预——monitor + auto-restart + rollback</p>
-        <ul class="detail-list">
-          <li>自动检测异常 → 自动重启 → 失败则自动回滚</li>
-          <li>systemd Restart=on-failure（禁止 always）</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 第八代 -->
-    <div class="group-header">第八代 · 情報先行 (17.0)</div>
-
-    <div class="ver-card" style="--dot-color: #bc8cff" onclick="toggle(this)">
-      <div class="card-header">
-        <span class="ver-badge">TCD 17.0</span>
-        <div class="ver-title">情報先行 × 決策壓縮 <span class="ver-subtitle">Palantir Essence</span></div>
-        <div class="ver-tags"><span class="tag tag-new">最新</span><span class="tag tag-core">Palantir精髓</span></div>
-        <span class="expand-btn">展开 ▾</span>
-      </div>
-      <div class="card-body">
-        <p class="principle">情報先行定上限，決策壓縮定價值——沒有結構化情報，AI 再聰明也只是瞎猜</p>
-        <ul class="detail-list">
-          <li>洞察來源：Palantir 戰場 AI 系統 × 礦廠監控系統結構同構</li>
-          <li>四層架構：本體層 / 融合層 / 推演層 / 確認層（人類在環）</li>
-          <li>AI 決策精準度 = 情報質量 × 推演邏輯</li>
-          <li>決策壓縮：10分析師×幾小時 → 1操作員×幾分鐘</li>
-          <li>公式：情報質量四維度 = 結構化 + 實時性 + 完整性 + 時間對齊</li>
-          <li>金句："數據 ≠ 情報；孤立的數據是噪音，融合的情報是武器"</li>
-        </ul>
-      </div>
-      <div class="card-metrics">
-        <div class="metric"><div class="metric-val" style="color:#bc8cff">4 層</div><div class="metric-key">架構深度</div></div>
-        <div class="metric"><div class="metric-val" style="color:#58a6ff">95%</div><div class="metric-key">AI診斷信心</div></div>
-        <div class="metric"><div class="metric-val" style="color:#3fb950">100B+</div><div class="metric-key">Palantir估值</div></div>
-        <div class="metric"><div class="metric-val" style="color:#d29922">10→1</div><div class="metric-key">分析師壓縮比</div></div>
-      </div>
-    </div>
-
-  </div><!-- /timeline -->
-
-  <!-- ══════════ Core Formulas ══════════ -->
-  <div class="formula">
-    <div class="formula-title">TCD 核心公式链</div>
-    <pre>KCD 1.0  →  TCD 2.0  →  TCD 3.0  →  TCD 4.x  →  TCD 5-9  →  TCD 10  →  TCD 11-15.10  →  TCD 16-17
-文档失败     AI翻译      分层架构    工程增强     系统进化    资源决策    认知升级/共识       自愈/情报
-
-核心公式:
-  AI 做翻译  +  脚本做执行  →  稳定输出
-  情报质量   ×  推演逻辑    →  决策精准度
-  人类25年技能  →  Clawn 0秒预装  →  4.38x 工时倍增</pre>
+<!-- ===== BOTTOM INSIGHTS ===== -->
+<div class="section-title">核心演进脉络</div>
+<div class="insights-section">
+  <div class="insight-card">
+    <h3 style="color: var(--fail)">从失败到范式（KCD 1.0 → TCD 3.0）</h3>
+    <p>KCD 1.0 的根本错误：让 AI 记住规则执行。TCD 2.0 的范式革命：AI 做翻译（概率性），程序做执行（确定性）。「一次翻译，N次执行」成为整个 TCD 体系的基石。</p>
   </div>
-
-  <!-- ══════════ Insights Grid ══════════ -->
-  <div class="section-title" style="margin-top:2.5rem">核心洞察</div>
-  <div class="insight-grid">
-    <div class="insight-card">
-      <h3>最大的失败教训</h3>
-      <p>KCD 1.0 写了 <code>50+ 页</code> 规则文档，AI 第一篇完美，第 8 篇格式全乱。根因：<strong>AI 不是数据库</strong>，文档是给人看的，不是给 AI 执行的。</p>
-    </div>
-    <div class="insight-card">
-      <h3>最大的范式转变</h3>
-      <p>TCD 2.0 的核心顿悟：AI 擅长"翻译"（一次），脚本擅长"执行"（多次）。<strong>让 AI 生成脚本，程序执行任务</strong>。错误率从 40% 降到 0%。</p>
-    </div>
-    <div class="insight-card">
-      <h3>最有价值的决策</h3>
-      <p>TCD 15.10 Haiku 优先策略：90% 的任务 Haiku 足够，盲目使用 Sonnet/Opus 是浪费。节省 <code>87.5%</code> 成本，完成度 100%。</p>
-    </div>
-    <div class="insight-card">
-      <h3>最新的突破洞察</h3>
-      <p>TCD 17.0 来自 Palantir 系统研究：<strong>情报先行定上限</strong>。多源孤立数据 → 结构化情报 → AI 推演 → 精准决策。AI 决策天花板由情报质量决定，不是模型能力。</p>
-    </div>
-    <div class="insight-card">
-      <h3>三大禁忌</h3>
-      <p>① AI 手动执行多步骤任务 ② 硬编码参数在代码里 ③ 不带验证直接宣称"完成"。<code>无验证代码 = 预设有问题的代码</code>。</p>
-    </div>
-    <div class="insight-card">
-      <h3>TCD vs LangChain</h3>
-      <p>TCD 适合<strong>流程已知</strong>的任务（80%），LangChain 适合流程未知的探索任务（5%）。TCD 复杂度低、可靠性高、故障易排查。</p>
-    </div>
+  <div class="insight-card">
+    <h3 style="color: var(--eng)">工程化深化（TCD 8.0 → 15.10）</h3>
+    <p>验证工程化 → 资源效率 → 以人为本 → 主动进攻 → 多AI共识 → 数据壁垒 → 自验证 → 情绪增强 → Clawn（数字劳动力）。每个版本解决上一版本遗留的一个核心问题。</p>
   </div>
+  <div class="insight-card">
+    <h3 style="color: var(--core)">情报驱动（TCD 16.0 → 17.0）</h3>
+    <p>从「系统自愈」到「情报先行」。TCD 17.0 提炼 Palantir 战场系统精髓：结构化情报是 AI 决策的天花板，而非模型能力。决策压缩才是真正的商业价值。</p>
+  </div>
+  <div class="insight-card">
+    <h3 style="color: var(--mem)">记忆革命（TCD 18.0 → 18.1）</h3>
+    <p>TCD 18.0 用三层架构 + Claude Code Hooks 实现零维护知识系统，节省 68% 上下文。TCD 18.1 引入时间约束和赛马机制，AI 与人类双赛道竞争，合并后质量提升 5%+。</p>
+  </div>
+  <div class="insight-card">
+    <h3 style="color: var(--market)">生态壁垒（技能市场 + CLI市场）</h3>
+    <p>96个 Skills + 13+个定制CLI 构成了不可复制的工具壁垒。TCD 15.2 的「数据壁垒」在工具层的具体体现：别人可以抄袭理念，但无法复制这套经过真实场景验证的工具生态。</p>
+  </div>
+  <div class="insight-card">
+    <h3 style="color: var(--end)">终局推演（TCD 20.0）</h3>
+    <p>「技术奇点不是人类的终点，而是角色重新定义的起点。」TCD 20.0 的核心洞察：在 AGI 时代，工程师的终极价值不是写代码，而是定义代码应当服务的人类价值——这是任何AI无法替代的。</p>
+  </div>
+</div>
 
-</div><!-- /main -->
+</div><!-- end container -->
 
-<footer>
-  <p>TCD 版本演进全览 · 生成于 <span id="date"></span> · <span>Mason</span> × Claude Code</p>
-  <p style="margin-top:0.4rem; font-size:0.72rem; color:#484f58">KCD 1.0（失败）→ TCD 17.0（情报先行）· 22+ 版本 · 21 条 P0 原则</p>
-</footer>
+<div class="footer">
+  <p>TCD Evolution · KCD 1.0 — TCD 20.0 · Mason · 2023–2026</p>
+  <p style="margin-top: 4px;">数据来源：TCD-Evolution-History.md + CLAUDE.md + ~/.claude/TCD-18.x/ + Obs Vault</p>
+</div>
 
 <script>
-  document.getElementById('date').textContent = new Date().toLocaleDateString('zh-CN');
+function toggle(card) {
+  card.classList.toggle('open');
+}
 
-  function toggle(card) {
-    card.classList.toggle('expanded');
-    const btn = card.querySelector('.expand-btn');
-    if (btn) {
-      btn.textContent = card.classList.contains('expanded') ? '收起 ▴' : '展开 ▾';
+// Auto-open important versions
+window.onload = function() {
+  const important = ['TCD 2.0', 'TCD 17.0', 'TCD 18.0', 'TCD 20.0'];
+  document.querySelectorAll('.version-badge').forEach(badge => {
+    if (important.some(v => badge.textContent.includes(v.replace('TCD ', '')))) {
+      badge.closest('.card').classList.add('open');
     }
-  }
-
-  // Auto-expand first few cards on load
-  document.querySelectorAll('.ver-card').forEach((card, i) => {
-    if (i < 2) toggle(card);
   });
+};
 </script>
 </body>
 </html>
